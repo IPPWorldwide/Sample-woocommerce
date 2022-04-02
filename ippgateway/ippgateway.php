@@ -76,6 +76,138 @@ add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'wc_ippgateway
  */
 add_action( 'plugins_loaded', 'wc_ippgateway_gateway_init', 11 );
 
+register_activation_hook(__FILE__, 'ippgateway_activation');
+register_deactivation_hook(__FILE__, 'ippgateway_deactivation');
+
+ function ippgateway_activation() {
+     wp_schedule_event(time(), 'hourly', 'ipp_hourly_event');
+ }
+ function ippgateway_deactivation() {
+    wp_clear_scheduled_hook('ipp_hourly_event');
+}
+add_action('ipp_hourly_event', 'ipp_hourly_transfer_orders');
+
+function ipp_hourly_transfer_orders() {
+    $posts = wc_get_orders( array(
+        'limit'        => 300,
+        'orderby'      => 'date',
+        'order'        => 'DESC',
+        'meta_key'     => 'syncronized', // The postmeta key field
+        'meta_compare' => 'NOT EXISTS', // The comparison argument
+    ) );
+    foreach($posts as $order) {
+        $settings = get_option( 'woocommerce_ippgateway_gateway_settings' );
+        $order_id = $order->get_id();
+        $data = [];
+        $order_data = [];
+        $data["id"] = $settings["merchant_id"];
+        $data["key2"] = $settings["payment_key"];
+        $data["order_id"] = $order_id;
+
+        $order_data["order_key"] = $order->get_order_key();
+        $order_data["formatted_total"] = $order->get_formatted_order_total();
+        $order_data["order_tax"] = $order->get_cart_tax();
+        $order_data["order_currency"] = $order->get_currency();
+        $order_data["order_tax_discount"] = $order->get_discount_tax();
+        $order_data["order_discount_total"] = $order->get_discount_total();
+        $order_data["order_fees"] = $order->get_fees();
+        $order_data["order_shipping_tax"] = $order->get_shipping_tax();
+        $order_data["order_shipping_total"] = $order->get_shipping_total();
+        $order_data["subtotal"] = $order->get_subtotal();
+        $order_data["tax_total"] = $order->get_tax_totals();
+        $order_data["taxes"] = $order->get_taxes();
+        $order_data["total"] = $order->get_total();
+        $order_data["total_tax"] = $order->get_total_tax();
+        $order_data["total_refunded"] = $order->get_total_refunded();
+        $order_data["tax_refunded"] = $order->get_total_tax_refunded();
+        $order_data["shipping_refunded"] = $order->get_total_shipping_refunded();
+        $order_data["items_refunded"] = $order->get_item_count_refunded();
+        $order_data["qty_refunded"] = $order->get_total_qty_refunded();
+        $order_data["date_created"] = $order->get_date_created();
+        $order_data["date_modified"] = $order->get_date_modified();
+        $order_data["date_completed"] = $order->get_date_completed();
+        $order_data["date_paid"] = $order->get_date_paid();
+        $order_data["customer_id"] = $order->get_customer_id();
+        $order_data["user_id"] = $order->get_user_id();
+        $order_data["user_ip"] = $order->get_customer_ip_address();
+        $order_data["user_agent"] = $order->get_customer_user_agent();
+        $order_data["billing_first_name"] = $order->get_billing_first_name();
+        $order_data["billing_last_name"] = $order->get_billing_last_name();
+        $order_data["billing_country"] = $order->get_billing_company();
+        $order_data["billing_address_1"] = $order->get_billing_address_1();
+        $order_data["billing_address_2"] = $order->get_billing_address_2();
+        $order_data["billing_city"] = $order->get_billing_city();
+        $order_data["billing_state"] = $order->get_billing_state();
+        $order_data["billing_postcode"] = $order->get_billing_postcode();
+        $order_data["billing_country"] = $order->get_billing_country();
+        $order_data["billing_email"] = $order->get_billing_email();
+        $order_data["billing_phone"] = $order->get_billing_phone();
+        $order_data["shipping_first_name"] = $order->get_shipping_first_name();
+        $order_data["shipping_last_name"] = $order->get_shipping_last_name();
+        $order_data["shipping_company"] = $order->get_shipping_company();
+        $order_data["shipping_address_1"] = $order->get_shipping_address_1();
+        $order_data["shipping_address_2"] = $order->get_shipping_address_2();
+        $order_data["shipping_city"] = $order->get_shipping_city();
+        $order_data["shipping_state"] = $order->get_shipping_state();
+        $order_data["shipping_postcode"] = $order->get_shipping_postcode();
+        $order_data["shipping_country"] = $order->get_shipping_country();
+        $order_data["billing_full_name"] = $order->get_formatted_billing_full_name();
+        $order_data["shipping_full_name"] = $order->get_formatted_shipping_full_name();
+        $order_data["billing_full_address"] = $order->get_formatted_billing_address();
+        $order_data["shipping_full_address"] = $order->get_formatted_shipping_address();
+
+        $order_data["payment_method"] = $order->get_payment_method();
+        $order_data["payment_method_title"] = $order->get_payment_method_title();
+        $order_data["payment_transaction_id"] = $order->get_transaction_id();
+
+        foreach($order->get_items() as $item) {
+            $product_id = $item->get_product_id();
+            $variation_id = $item->get_variation_id();
+            $product = $item->get_product();
+            $product_name = $item->get_name();
+            $quantity = $item->get_quantity();
+            $subtotal = $item->get_subtotal();
+            $total = $item->get_total();
+            $tax = $item->get_subtotal_tax();
+            $taxclass = $item->get_tax_class();
+            $taxstat = $item->get_tax_status();
+            $allmeta = $item->get_meta_data();
+            $product_type = $item->get_type();
+            $order_data["items"][] = [
+                "product_id"    => $product_id,
+                "variation_id"  => $variation_id,
+                "product"       => $product,
+                "product_name"  => $product_name,
+                "quantity"      => $quantity,
+                "subtotal"      => $subtotal,
+                "total"         => $total,
+                "tax"           => $tax,
+                "taxclass"      => $taxclass,
+                "taxstat"       => $taxstat,
+                "allmeta"       => $allmeta,
+                "product_type"  => $product_type
+            ];
+        }
+        $data["order_data"] = json_encode($order_data, JSON_THROW_ON_ERROR);
+
+        $response = wp_remote_post("https://api.ippeurope.com/company/orders/add_order.php", array(
+                'method'      => 'POST',
+                'timeout'     => 3,
+                'redirection' => 2,
+                'httpversion' => '1.0',
+                'blocking'    => true,
+                'headers'     => array(),
+                'body'        => $data,
+                'cookies'     => array()
+            )
+        );
+        var_dump($response);
+        if (!is_wp_error( $response ) ) {
+            update_post_meta($order_id, 'syncronized', time());
+        }
+    }
+}
+
 function wc_ippgateway_gateway_init() {
 
     class WC_Gateway_IPPGateway extends WC_Payment_Gateway {
@@ -131,10 +263,7 @@ function wc_ippgateway_gateway_init() {
 
             add_action('woocommerce_scheduled_subscription_payment_' . $this->id, array($this, 'scheduled_subscription_payment'), 10, 2);
 
-
-
         }
-
         public function setDescription() {
             return $this->get_option( 'description' );
         }
@@ -238,6 +367,7 @@ function wc_ippgateway_gateway_init() {
                 update_post_meta((int)$posted["wooorderid"], 'Transaction ID', $posted["transaction_id"]);
                 update_post_meta((int)$posted["wooorderid"], 'Transaction Key', $posted["transaction_key"]);
                 update_post_meta((int)$posted["wooorderid"], 'Card no', $status->card_data->pan);
+                $order->set_transaction_id( $posted["transaction_id"] );
                 $order->update_status('processing');
                 status_header(200);
             }
@@ -273,7 +403,7 @@ function wc_ippgateway_gateway_init() {
 
                 $data   = [];
                 $data["currency"] = $renewal_order->get_currency();
-                $data["amount"] = $amount;
+                $data["amount"] = number_format($amount,2,"","");
                 $data["order_id"] = $renewal_order_id;
                 $data["transaction_type"] = "ECOM";
                 $data["ipn"] = add_query_arg('wooorderid', $renewal_order_id, add_query_arg('wc-api', 'ippgateway', $this->get_return_url($renewal_order)));
@@ -362,9 +492,9 @@ function wc_ippgateway_gateway_init() {
             $ipp = new IPPGateway($this->merchant_id,$this->payment_key);
 
             $data   = [];
-            $data["currency"] = "EUR";
-            $data["amount"] = 800;
-            $data["order_id"] = 123;
+            $data["currency"] = $order->get_currency();
+            $data["amount"] = number_format($order->get_total(),2,"","");
+            $data["order_id"] = $order_id;
             $data["transaction_type"] = "ECOM";
             $data["ipn"] = add_query_arg('wooorderid', $order_id, add_query_arg('wc-api', 'ippgateway', $this->get_return_url($order)));
             $data["accepturl"] = $this->get_return_url($order);
@@ -409,9 +539,7 @@ function wc_ippgateway_gateway_init() {
                 wp_enqueue_script( 'js-file', plugin_dir_url( __FILE__ ) . 'assets/ipppay.js');
             }
         }
-
-    } // end \WC_Gateway_IPPGateway class
-
+    }
 }
 add_filter( 'generate_rewrite_rules', function ( $wp_rewrite ){
     $wp_rewrite->rules = array_merge(
