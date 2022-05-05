@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap');
+#paymentForm {
+    position: relative;
+    text-align: center;
+
+}
+
+#paymentForm {
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #0C4160;
+
+    padding: 30px 10px;
+}
+
+#paymentForm .form {
+    background-color: white;
+    max-width: 500px;
+    margin: auto;
+    color: black;
+    border-radius: 20px;
+}
+
+p {
+    margin: 0px;
+}
+
+.PaymentFields .container .h8 {
+    font-size: 30px;
+    font-weight: 800;
+    text-align: center;
+}
+
+.PaymentFields #payw_confirmPayment {
+    width: 100%;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 15px;
+    background-image: linear-gradient(to right, #77A1D3 0%, #79CBCA 51%, #77A1D3 100%);
+    border: none;
+    transition: 0.5s;
+    background-size: 200% auto;
+
+}
+
+
+.PaymentFields #payw_confirmPayment:hover {
+    background-position: right center;
+    color: #fff;
+    text-decoration: none;
+}
+
+.PaymentFields #payw_confirmPayment:hover .fas.fa-arrow-right {
+    transform: translate(15px);
+    transition: transform 0.2s ease-in;
+}
+
+.field-content input {
+    color: white;
+    background-color: #223C60;
+    border: 2px solid transparent;
+    height: 60px;
+    padding-left: 20px;
+    vertical-align: middle;
+    width: 100%;
+}
+
+.PaymentFields #payw_confirmPayment:focus {
+    color: white;
+    background-color: #0C4160;
+    border: 2px solid #2d4dda;
+    box-shadow: none;
+}
+.PaymentFields {
+    text-align: left;
+    padding: 0 0 25px;
+}
+.PaymentFields div {
+    padding: 10px 25px 0 25px;
+}
+.PaymentFields .field-description {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.PaymentFields ::placeholder {
+    font-size: 14px;
+    font-weight: 600;
+}
+#div_payw_confirm {
+    margin: 25px 0 25px 0;
+}
+#div_payw_confirm .field-description {
+    display: none;
+}
