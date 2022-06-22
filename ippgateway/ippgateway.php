@@ -77,13 +77,31 @@ add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'wc_ippgateway
  * @author 		Mathias Gajhede
  */
 add_action( 'plugins_loaded', 'wc_ippgateway_gateway_init', 11 );
+add_filter( 'generate_rewrite_rules', function ( $wp_rewrite ) {
+    $wp_rewrite->rules = array_merge(
+        ['ippgateway/?$' => 'index.php?custom=1'],
+        $wp_rewrite->rules
+    );
+} );
+add_filter( 'query_vars', function( $query_vars ){
+    $query_vars[] = 'custom';
+    return $query_vars;
+} );
+add_action( 'template_redirect', function(){
+    $custom = intval( get_query_var( 'custom' ) );
+    if ( $custom ) {
+        include plugin_dir_path( __FILE__ ) . 'templates/public.php';
+        die;
+    }
+} );
 
 register_activation_hook(__FILE__, 'ippgateway_activation');
 register_deactivation_hook(__FILE__, 'ippgateway_deactivation');
 
- function ippgateway_activation() {
-     wp_schedule_event(time(), 'hourly', 'ipp_hourly_event');
- }
+function ippgateway_activation() {
+    flush_rewrite_rules();
+    wp_schedule_event(time(), 'hourly', 'ipp_hourly_event');
+}
  function ippgateway_deactivation() {
     wp_clear_scheduled_hook('ipp_hourly_event');
 }
@@ -211,7 +229,6 @@ function ipp_hourly_transfer_orders() {
 }
 
 function wc_ippgateway_gateway_init() {
-
     class WC_Gateway_IPPGateway extends WC_Payment_Gateway {
 
         /**
@@ -428,6 +445,7 @@ function wc_ippgateway_gateway_init() {
                 $data["billing"]["email"] = $renewal_order->get_billing_email();
 
                 $data = $ipp->checkout_id($data);
+
                 $data_url = $data->checkout_id;
                 $cryptogram = $data->cryptogram;
 
@@ -492,7 +510,6 @@ function wc_ippgateway_gateway_init() {
 
             include(plugin_dir_path( __FILE__ )."classes/IPPGateway.php");
             $ipp = new IPPGateway($this->merchant_id,$this->payment_key);
-
             $data   = [];
             $data["currency"] = $order->get_currency();
             $data["amount"] = number_format($order->get_total(),2,"","");
@@ -520,14 +537,12 @@ function wc_ippgateway_gateway_init() {
             if ($this->woocommerce_subscription_plugin_is_active() && wcs_order_contains_subscription($order)) {
                 $data['rebilling'] = 1;
             }
-
             $data = $ipp->checkout_id($data);
             $data_url = $data->checkout_id;
             $cryptogram = $data->cryptogram;
-
             return array(
                 'result' 	=> 'success',
-                'redirect'	=> "/ippgateway?checkout_id=".$data->checkout_id."&cryptogram=".$data->cryptogram
+                'redirect'	=> site_url() ."/ippgateway?checkout_id=".$data->checkout_id."&cryptogram=".$data->cryptogram
             );
         }
         private function woocommerce_subscription_plugin_is_active()
@@ -543,20 +558,3 @@ function wc_ippgateway_gateway_init() {
         }
     }
 }
-add_filter( 'generate_rewrite_rules', function ( $wp_rewrite ){
-    $wp_rewrite->rules = array_merge(
-        ['ippgateway/?$' => 'index.php?custom=1'],
-        $wp_rewrite->rules
-    );
-} );
-add_filter( 'query_vars', function( $query_vars ){
-    $query_vars[] = 'custom';
-    return $query_vars;
-} );
-add_action( 'template_redirect', function(){
-    $custom = intval( get_query_var( 'custom' ) );
-    if ( $custom ) {
-        include plugin_dir_path( __FILE__ ) . 'templates/public.php';
-        die;
-    }
-} );
