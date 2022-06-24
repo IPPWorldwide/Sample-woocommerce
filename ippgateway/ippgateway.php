@@ -271,7 +271,7 @@ function wc_ippgateway_gateway_init() {
 
             // Actions
             add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-            add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
+            add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ), 10, 1 );
             // Customer Emails
             add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
             add_action( 'wp_footer', array( $this, 'add_jscript_checkout' ), 9999 );
@@ -346,9 +346,21 @@ function wc_ippgateway_gateway_init() {
         /**
          * Output for the order received page.
          */
-        public function thankyou_page() {
-            if ( $this->instructions ) {
-                echo wpautop( wptexturize( $this->instructions ) );
+        public function thankyou_page($order_id) {
+            include(plugin_dir_path( __FILE__ )."classes/IPPGateway.php");
+
+            $posted = stripslashes_deep($_POST);
+            $order = new WC_Order((int)$order_id);
+            $order->add_order_note(__('Thank You page', 'ippgateway'));
+            update_post_meta((int)$order_id, 'Transaction ID', $posted["transaction_id"]);
+            update_post_meta((int)$order_id, 'Transaction Key', $posted["transaction_key"]);
+            $order->set_transaction_id( $posted["transaction_id"] );
+
+            $ipp    = new IPPGateway($this->merchant_id,$this->payment_key);
+            $status = $ipp->payment_status($posted["transaction_id"],$posted["transaction_key"]);
+            if($status->result == "ACK") {
+                update_post_meta((int)$order_id, 'Action ID ', $status->payment->action_id);
+                $order->update_status('processing');
             }
         }
 
@@ -542,7 +554,7 @@ function wc_ippgateway_gateway_init() {
             $cryptogram = $data->cryptogram;
             return array(
                 'result' 	=> 'success',
-                'redirect'	=> site_url() ."/ippgateway?checkout_id=".$data->checkout_id."&cryptogram=".$data->cryptogram
+                'redirect'	=> site_url() ."/ippgateway?accepturl=".urlencode($this->get_return_url($order))."&checkout_id=".$data->checkout_id."&cryptogram=".$data->cryptogram
             );
         }
         private function woocommerce_subscription_plugin_is_active()
