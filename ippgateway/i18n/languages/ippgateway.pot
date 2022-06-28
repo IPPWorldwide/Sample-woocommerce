@@ -1,0 +1,97 @@
+# Copyright (C) 2022 Mathias Gajhede
+# This file is distributed under the GNU General Public License v3.0.
+msgid ""
+msgstr ""
+"Project-Id-Version: IPPGateway Services 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/ippgateway\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2022-06-28T11:45:14+05:30\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.6.0\n"
+"X-Domain: wc-gateway-ippgateway\n"
+
+#. Plugin Name of the plugin
+msgid "IPPGateway Services"
+msgstr ""
+
+#. Plugin URI of the plugin
+msgid "https://www.ippeurope.com"
+msgstr ""
+
+#. Description of the plugin
+#: ippgateway.php:257
+msgid "IPPGateway"
+msgstr ""
+
+#. Author of the plugin
+msgid "Mathias Gajhede"
+msgstr ""
+
+#. Author URI of the plugin
+msgid "http://www.ippeurope.com"
+msgstr ""
+
+#: ippgateway.php:59
+msgid "Configure"
+msgstr ""
+
+#: ippgateway.php:258
+msgid "Allows ippgateway payments. Very handy if you use your cheque gateway for another payment method, and can help with testing. Orders are marked as \"on-hold\" when received."
+msgstr ""
+
+#: ippgateway.php:297
+msgid "Enable/Disable"
+msgstr ""
+
+#: ippgateway.php:299
+msgid "Enable IPPGateway Payment"
+msgstr ""
+
+#: ippgateway.php:304
+msgid "Title"
+msgstr ""
+
+#: ippgateway.php:306
+#: ippgateway.php:314
+msgid "This controls the title for the payment method the customer sees during checkout."
+msgstr ""
+
+#: ippgateway.php:307
+msgid "IPPGateway Payment"
+msgstr ""
+
+#: ippgateway.php:312
+msgid "Merchant ID"
+msgstr ""
+
+#: ippgateway.php:320
+msgid "Key 2"
+msgstr ""
+
+#: ippgateway.php:322
+msgid "Key 2 (Payment Key) to be find in your Merchant Portal"
+msgstr ""
+
+#: ippgateway.php:328
+msgid "Description"
+msgstr ""
+
+#: ippgateway.php:330
+msgid "Payment method description that the customer will see on your checkout."
+msgstr ""
+
+#: ippgateway.php:331
+msgid "Please pay through VISA or MasterCard"
+msgstr ""
+
+#: ippgateway.php:336
+msgid "Instructions"
+msgstr ""
+
+#: ippgateway.php:338
+msgid "Instructions that will be added to the thank you page and emails."
+msgstr ""
