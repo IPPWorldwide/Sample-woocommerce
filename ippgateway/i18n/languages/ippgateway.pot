@@ -16,73 +16,73 @@ msgstr ""
 
 #. Plugin Name of the plugin
 msgid "IPPGateway Services"
-msgstr ""
+msgstr "Translation"
 
 #. Plugin URI of the plugin
 msgid "https://www.ippeurope.com"
-msgstr ""
+msgstr "Translation"
 
 #. Description of the plugin
 #: ippgateway.php:257
 msgid "IPPGateway"
-msgstr ""
+msgstr "Translation"
 
 #. Author of the plugin
 msgid "Mathias Gajhede"
-msgstr ""
+msgstr "Translation"
 
 #. Author URI of the plugin
 msgid "http://www.ippeurope.com"
-msgstr ""
+msgstr "Translation"
 
 #: ippgateway.php:59
 msgid "Configure"
-msgstr ""
+msgstr "Translation"
 
 #: ippgateway.php:258
 msgid "Allows ippgateway payments. Very handy if you use your cheque gateway for another payment method, and can help with testing. Orders are marked as \"on-hold\" when received."
-msgstr ""
+msgstr "Translation"
 
 #: ippgateway.php:297
 msgid "Enable/Disable"
-msgstr ""
+msgstr "Translation"
 
 #: ippgateway.php:299
 msgid "Enable IPPGateway Payment"
-msgstr ""
+msgstr "Translation"
 
 #: ippgateway.php:304
 msgid "Title"
-msgstr ""
+msgstr "Translation"
 
 #: ippgateway.php:306
 #: ippgateway.php:314
 msgid "This controls the title for the payment method the customer sees during checkout."
-msgstr ""
+msgstr "Translation"
 
 #: ippgateway.php:307
 msgid "IPPGateway Payment"
-msgstr ""
+msgstr "Translation"
 
 #: ippgateway.php:312
 msgid "Merchant ID"
-msgstr ""
+msgstr "Translation"
 
 #: ippgateway.php:320
 msgid "Key 2"
-msgstr ""
+msgstr "Translation"
 
 #: ippgateway.php:322
 msgid "Key 2 (Payment Key) to be find in your Merchant Portal"
-msgstr ""
+msgstr "Translation"
 
 #: ippgateway.php:328
 msgid "Description"
-msgstr ""
+msgstr "Translation"
 
 #: ippgateway.php:330
 msgid "Payment method description that the customer will see on your checkout."
-msgstr ""
+msgstr "Translation"
 
 #: ippgateway.php:331
 msgid "Please pay through VISA or MasterCard"

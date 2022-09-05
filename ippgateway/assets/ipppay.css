@@ -96,3 +96,22 @@ p {
 #div_payw_confirm .field-description {
     display: none;
 }
+.paymentWidgets {
+    background: #FFF;
+    position:fixed;
+    z-index:9999;
+    top: 50%;
+    left: 50%;
+    /* bring your own prefixes */
+    transform: translate(-50%, -50%);
+    width: 20vw;
+
+}
+.paymentBackground {
+    background-color: #FFF;
+    opacity: 0.5;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    z-index: 9999;
+}

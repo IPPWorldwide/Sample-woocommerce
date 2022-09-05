@@ -28,6 +28,5 @@ echo '
             </form>    
         </div>
     </div>
-    
 ';
 echo get_footer();
