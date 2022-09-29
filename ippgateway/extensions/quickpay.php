@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name: IPPGateway Services
+ * Plugin Name: IPP Quickpay Services
  * Plugin URI: https://www.ippeurope.com
- * Description: IPPGateway
+ * Description: IPP Quickpay
  * Author: Mathias Gajhede
  * Author URI: http://www.ippeurope.com
  * Version: 1.0.0
- * Text Domain: wc-gateway-ippgateway
+ * Text Domain: wc-gateway-ipp_quickpay
  * Domain Path: /i18n/languages/
  *
  * Copyright: (c) 2022 IPP Europe
@@ -14,7 +14,7 @@
  * License: GNU General Public License v3.0
  * License URI: http://www.gnu.org/licenses/gpl-3.0.html
  *
- * @package   WC-Gateway-IPPGateway
+ * @package   WC-Gateway-IPP-Quickpay
  * @author    Mathias Gajhede
  * @category  Admin
  * @copyright Copyright (c) 2022, IPP Europe
@@ -24,7 +24,6 @@
  */
 
 defined( 'ABSPATH' ) or exit;
-define("IPPGATEWAY_DIR",plugin_dir_url( __FILE__ ));
 
 
 // Make sure WooCommerce is active
@@ -37,13 +36,13 @@ if ( ! in_array( 'woocommerce/woocommerce.php', apply_filters( 'active_plugins',
  *
  * @since 1.0.0
  * @param array $gateways all available WC gateways
- * @return array $gateways all WC gateways + IPPGateway
+ * @return array $gateways all WC gateways + IPP Quickpay
  */
-function wc_ippgateway_add_to_gateways( $gateways ) {
-    $gateways[] = 'WC_Gateway_IPPGateway';
+function wc_ipp_quickpay_add_to_gateways( $gateways ) {
+    $gateways[] = 'WC_Gateway_ipp_quickpay';
     return $gateways;
 }
-add_filter( 'woocommerce_payment_gateways', 'wc_ippgateway_add_to_gateways' );
+add_filter( 'woocommerce_payment_gateways', 'wc_ipp_quickpay_add_to_gateways' );
 
 
 /**
@@ -53,15 +52,15 @@ add_filter( 'woocommerce_payment_gateways', 'wc_ippgateway_add_to_gateways' );
  * @param array $links all plugin links
  * @return array $links all plugin links + our custom links (i.e., "Settings")
  */
-function wc_ippgateway_gateway_plugin_links( $links ) {
+function wc_ipp_quickpay_gateway_plugin_links( $links ) {
 
     $plugin_links = array(
-        '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=ippgateway_gateway' ) . '">' . __( 'Configure', 'wc-gateway-ippgateway' ) . '</a>'
+        '<a href="' . admin_url( 'admin.php?page=wc-settings&tab=checkout&section=ipp_quickpay_gateway' ) . '">' . __( 'Configure', 'wc-gateway-ipp_quickpay' ) . '</a>'
     );
 
     return array_merge( $plugin_links, $links );
 }
-add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'wc_ippgateway_gateway_plugin_links' );
+add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'wc_ipp_quickpay_gateway_plugin_links' );
 
 
 /**
@@ -70,35 +69,35 @@ add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'wc_ippgateway
  * Provides an IPP Payment Gateway; mainly for testing purposes.
  * We load it later to ensure WC is loaded first since we're extending it.
  *
- * @class 		WC_Gateway_IPPGateway
+ * @class 		WC_Gateway_ipp_quickpay
  * @extends		WC_Payment_Gateway
  * @version		1.0.0
  * @package		WooCommerce/Classes/Payment
  * @author 		Mathias Gajhede
  */
-add_action( 'plugins_loaded', 'wc_ippgateway_gateway_init', 11 );
+add_action( 'plugins_loaded', 'wc_ipp_quickpay_gateway_init', 11 );
 
-register_activation_hook(__FILE__, 'ippgateway_activation');
-register_deactivation_hook(__FILE__, 'ippgateway_deactivation');
+register_activation_hook(__FILE__, 'ipp_quickpay_activation');
+register_deactivation_hook(__FILE__, 'ipp_quickpay_deactivation');
 
- function ippgateway_activation() {
-     wp_schedule_event(time(), 'hourly', 'ipp_hourly_event');
- }
- function ippgateway_deactivation() {
-    wp_clear_scheduled_hook('ipp_hourly_event');
+function ipp_quickpay_activation() {
+    wp_schedule_event(time(), 'hourly', 'ipp_quickpay_hourly_event');
 }
-add_action('ipp_hourly_event', 'ipp_hourly_transfer_orders');
+function ipp_quickpay_deactivation() {
+    wp_clear_scheduled_hook('ipp_quickpay_hourly_event');
+}
+add_action('ipp_hourly_event', 'ipp_quickpay_hourly_transfer_orders');
 
-function ipp_hourly_transfer_orders() {
+function ipp_quickpay_hourly_transfer_orders() {
     $posts = wc_get_orders( array(
-        'limit'        => 3000,
+        'limit'        => 300,
         'orderby'      => 'date',
         'order'        => 'DESC',
         'meta_key'     => 'syncronized', // The postmeta key field
         'meta_compare' => 'NOT EXISTS', // The comparison argument
     ) );
     foreach($posts as $order) {
-        $settings = get_option( 'woocommerce_ippgateway_gateway_settings' );
+        $settings = get_option( 'woocommerce_ipp_quickpay_gateway_settings' );
         $order_id = $order->get_id();
         $data = [];
         $order_data = [];
@@ -191,6 +190,7 @@ function ipp_hourly_transfer_orders() {
             ];
         }
         $data["order_data"] = json_encode($order_data, JSON_THROW_ON_ERROR);
+
         $response = wp_remote_post("https://api.ippeurope.com/company/orders/add_order.php", array(
                 'method'      => 'POST',
                 'timeout'     => 3,
@@ -207,31 +207,15 @@ function ipp_hourly_transfer_orders() {
         }
     }
 }
-function alternative_payment_methods() {
-    $settings = get_option( 'woocommerce_ippgateway_gateway_settings' );
-    if(isset($settings["merchant_id"]) && $settings["merchant_id"] !== "" && isset($settings["payment_key"]) && $settings["payment_key"] !== "") {
-        include(plugin_dir_path( __FILE__ )."classes/IPPGateway.php");
-        $ipp = new IPPGateway($settings["merchant_id"],$settings["payment_key"]);
 
-        $data = $ipp->request("company/payment_methods/index", ["company_id" => $settings["merchant_id"], "key2" => $settings["payment_key"]])->content;
-        foreach($data as $value) {
-            if(file_exists(__DIR__ . "/extensions/".$value->slug.".php"))
-                include(__DIR__ . "/extensions/".$value->slug.".php");
-        }
-    }
-}
-alternative_payment_methods();
+function wc_ipp_quickpay_gateway_init() {
 
-function wc_ippgateway_gateway_init() {
-
-    class WC_Gateway_IPPGateway extends WC_Payment_Gateway {
+    class WC_Gateway_ipp_quickpay extends WC_Payment_Gateway {
 
         /**
          * Constructor for the gateway.
          */
         public function __construct() {
-            include(plugin_dir_path( __FILE__ )."classes/IPPGateway.php");
-
             global $woocommerce;
             $supports[] = "products";
             $supports[] = 'refunds';
@@ -248,11 +232,11 @@ function wc_ippgateway_gateway_init() {
             $supports[] = 'subscription_payment_method_change_admin';
             $supports[] = 'pre-orders';
 
-            $this->id                 = 'ippgateway_gateway';
-            $this->icon               = apply_filters('woocommerce_ippgateway_icon', '');
+            $this->id                 = 'ipp_quickpay_gateway';
+            $this->icon               = apply_filters('woocommerce_ipp_quickpay_icon', '');
             $this->has_fields         = false;
-            $this->method_title       = __( 'IPPGateway', 'wc-gateway-ippgateway' );
-            $this->method_description = __( 'Allows ippgateway payments. Very handy if you use your cheque gateway for another payment method, and can help with testing. Orders are marked as "on-hold" when received.', 'wc-gateway-ippgateway' );
+            $this->method_title       = __( 'Quickpay', 'wc-gateway-ipp_quickpay' );
+            $this->method_description = __( 'Allows ipp_quickpay payments', 'wc-gateway-ipp_quickpay' );
             $this->supports           = $supports;
 
             // Load the settings.
@@ -265,70 +249,20 @@ function wc_ippgateway_gateway_init() {
             $this->instructions = $this->get_option( 'instructions', $this->description );
             $this->merchant_id  = isset($this->settings["merchant_id"]) ? $this->settings["merchant_id"] : "";
             $this->payment_key  = isset($this->settings["payment_key"]) ? $this->settings["payment_key"] : "";
-            $this->data_key  = isset($this->settings["data_key"]) ? $this->settings["data_key"] : "";
-            $this->ipp = new IPPGateway($this->merchant_id,$this->payment_key);
 
             // Actions
             add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
             add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_page' ) );
             // Customer Emails
             add_action( 'woocommerce_email_before_order_table', array( $this, 'email_instructions' ), 10, 3 );
+            add_action( 'wp_footer', array( $this, 'add_jscript_checkout' ), 9999 );
+            add_action('wp_enqueue_scripts', array( $this, 'add_jscript_checkout' ));
 
 
-            add_action( 'woocommerce_api_ippgateway', array( $this, 'webhook' ) );
+            add_action( 'woocommerce_api_ipp_quickpay', array( $this, 'webhook' ) );
 
             add_action('woocommerce_scheduled_subscription_payment_' . $this->id, array($this, 'scheduled_subscription_payment'), 10, 2);
-            wp_enqueue_script( 'payment-gateway-modalit-file', plugin_dir_url( __FILE__ ) . 'assets/modalit.js',array(),null, true);
 
-            add_action('add_meta_boxes', array(&$this, 'meta_boxes'), 10, 0);
-
-        }
-        public function meta_boxes()
-        {
-            add_meta_box(
-                'related-info',
-                __('Related orders', 'wc-gateway-ippgateway'),
-                array(&$this, 'meta_box_related'),
-                'shop_order',
-                'side',
-                'high'
-            );
-        }
-        public function meta_box_related()
-        {
-            global $post;
-            $order = new WC_Order($post->ID);
-            $transactionId = get_post_meta($order->get_id(), 'Transaction ID', true);
-            $transactionKey = get_post_meta($order->get_id(), 'Transaction Key', true);
-            if(isset($this->data_key) && $this->data_key !== "") {
-                include(plugin_dir_path( __FILE__ )."classes/IPPCompany.php");
-                $ipp    = new IPPcompany($this->merchant_id,$this->data_key);
-                $related = $ipp->TransactionsRelated($transactionId,"AUTH");
-                if((count((array)$related) > 0)) {
-                    $action_id = $related[0]->action_id;
-                    $transaction_data = $ipp->TransactionsData($action_id)->order_data->related;
-                    if(count((array)$transaction_data) > 0) {
-                        echo "Other orders from the same customer";
-                        echo "<table>";
-                            echo "<tr>";
-                                echo "<td>";
-                                    echo "Order ID";
-                                echo "</td>";
-                            echo "<tr>";
-                        foreach($transaction_data as $value) {
-                            if(get_post_type($value->readable_order_id) == "shop_order")
-                            {
-                                echo "<tr>";
-                                    echo "<td>";
-                                        echo "<a href='post.php?post=".$value->readable_order_id."&action=edit'>" . $value->readable_order_id . "</a>";
-                                    echo "</td>";
-                                echo "<tr>";
-                            }
-                        }
-                        echo "</table>";
-                    }
-                }
-            }
         }
         public function setDescription() {
             return $this->get_option( 'description' );
@@ -338,59 +272,51 @@ function wc_ippgateway_gateway_init() {
          */
         public function init_form_fields() {
 
-            $this->form_fields = apply_filters( 'wc_ippgateway_form_fields', array(
+            $this->form_fields = apply_filters( 'wc_ipp_quickpay_form_fields', array(
 
                 'enabled' => array(
-                    'title'   => __( 'Enable/Disable', 'wc-gateway-ippgateway' ),
+                    'title'   => __( 'Enable/Disable', 'wc-gateway-ipp_quickpay' ),
                     'type'    => 'checkbox',
-                    'label'   => __( 'Enable IPPGateway Payment', 'wc-gateway-ippgateway' ),
+                    'label'   => __( 'Enable Quickpay Payment Methods', 'wc-gateway-ipp_quickpay' ),
                     'default' => 'yes'
                 ),
 
                 'title' => array(
-                    'title'       => __( 'Title', 'wc-gateway-ippgateway' ),
+                    'title'       => __( 'Title', 'wc-gateway-ipp_quickpay' ),
                     'type'        => 'text',
-                    'description' => __( 'This controls the title for the payment method the customer sees during checkout.', 'wc-gateway-ippgateway' ),
-                    'default'     => __( 'IPPGateway Payment', 'wc-gateway-ippgateway' ),
+                    'description' => __( 'This controls the title for the payment method the customer sees during checkout.', 'wc-gateway-ipp_quickpay' ),
+                    'default'     => __( 'Quickpay Payment Methods', 'wc-gateway-ipp_quickpay' ),
                     'desc_tip'    => true,
                 ),
 
                 'merchant_id' => array(
-                    'title'       => __( 'Merchant ID', 'wc-gateway-ippgateway' ),
+                    'title'       => __( 'IPP Merchant ID', 'wc-gateway-ipp_quickpay' ),
                     'type'        => 'text',
-                    'description' => __( 'This controls the title for the payment method the customer sees during checkout.', 'wc-gateway-ippgateway' ),
-                    'default'     => __( '', 'wc-gateway-ippgateway' ),
-                    'desc_tip'    => true,
-                ),
-
-                'data_key' => array(
-                    'title'       => __( 'Key 1 (API Key)', 'wc-gateway-ippgateway' ),
-                    'type'        => 'text',
-                    'description' => __( 'Key 1 (Data Key) to be find in your Merchant Portal', 'wc-gateway-ippgateway' ),
-                    'default'     => __( '', 'wc-gateway-ippgateway' ),
+                    'description' => __( 'This controls the title for the payment method the customer sees during checkout.', 'wc-gateway-ipp_quickpay' ),
+                    'default'     => __( '', 'wc-gateway-ipp_quickpay' ),
                     'desc_tip'    => true,
                 ),
 
                 'payment_key' => array(
-                    'title'       => __( 'Key 2 (Payment Key)', 'wc-gateway-ippgateway' ),
+                    'title'       => __( 'IPP Payment', 'wc-gateway-ipp_quickpay' ),
                     'type'        => 'text',
-                    'description' => __( 'Key 2 (Payment Key) to be find in your Merchant Portal', 'wc-gateway-ippgateway' ),
-                    'default'     => __( '', 'wc-gateway-ippgateway' ),
+                    'description' => __( 'Key 2 (Payment Key) to be find in your Merchant Portal', 'wc-gateway-ipp_quickpay' ),
+                    'default'     => __( '', 'wc-gateway-ipp_quickpay' ),
                     'desc_tip'    => true,
                 ),
 
                 'description' => array(
-                    'title'       => __( 'Description', 'wc-gateway-ippgateway' ),
+                    'title'       => __( 'Description', 'wc-gateway-ipp_quickpay' ),
                     'type'        => 'textarea',
-                    'description' => __( 'Payment method description that the customer will see on your checkout.', 'wc-gateway-ippgateway' ),
-                    'default'     => __( 'Please pay through VISA or MasterCard', 'wc-gateway-ippgateway' ),
+                    'description' => __( 'Payment method description that the customer will see on your checkout.', 'wc-gateway-ipp_quickpay' ),
+                    'default'     => __( 'Please pay through VISA or MasterCard', 'wc-gateway-ipp_quickpay' ),
                     'desc_tip'    => true,
                 ),
 
                 'instructions' => array(
-                    'title'       => __( 'Instructions', 'wc-gateway-ippgateway' ),
+                    'title'       => __( 'Instructions', 'wc-gateway-ipp_quickpay' ),
                     'type'        => 'textarea',
-                    'description' => __( 'Instructions that will be added to the thank you page and emails.', 'wc-gateway-ippgateway' ),
+                    'description' => __( 'Instructions that will be added to the thank you page and emails.', 'wc-gateway-ipp_quickpay' ),
                     'default'     => '',
                     'desc_tip'    => true,
                 ),
@@ -427,17 +353,17 @@ function wc_ippgateway_gateway_init() {
          * Handle the IPN from IPP
          */
         function webhook() {
-            include(plugin_dir_path( __FILE__ )."classes/IPPGateway.php");
+            include(plugin_dir_path( __FILE__ )."../classes/IPPGateway.php");
             $posted = stripslashes_deep($_GET);
 
             header( 'HTTP/1.1 200 OK' );
             $order = new WC_Order((int)$posted["wooorderid"]);
 
-            $ipp    = new IPPGateway($this->merchant_id,$this->payment_key);
-            $status = $ipp->payment_status($posted["transaction_id"],$posted["transaction_key"]);
+            $ipp_quickpay    = new IPPGateway($this->merchant_id,$this->payment_key);
+            $status = $ipp_quickpay->payment_status($posted["transaction_id"],$posted["transaction_key"]);
 
             if($status->result == "ACK") {
-                $order->add_order_note(__('Callback performed', 'ippgateway'));
+                $order->add_order_note(__('Callback performed', 'ipp_quickpay'));
                 update_post_meta((int)$posted["wooorderid"], 'Transaction ID', $posted["transaction_id"]);
                 update_post_meta((int)$posted["wooorderid"], 'Transaction Key', $posted["transaction_key"]);
                 update_post_meta((int)$posted["wooorderid"], 'Card no', $status->card_data->pan);
@@ -472,15 +398,15 @@ function wc_ippgateway_gateway_init() {
             $renewal_order = wc_get_order( $renewal_order_id );
             if ($latest_renewal < time() - 1) {
 
-                include(plugin_dir_path( __FILE__ )."classes/IPPGateway.php");
-                $ipp = new IPPGateway($this->merchant_id,$this->payment_key);
+                include(plugin_dir_path( __FILE__ )."../classes/IPPGateway.php");
+                $ipp_quickpay = new IPPGateway($this->merchant_id,$this->payment_key);
 
                 $data   = [];
                 $data["currency"] = $renewal_order->get_currency();
                 $data["amount"] = number_format($amount,2,"","");
                 $data["order_id"] = $renewal_order_id;
                 $data["transaction_type"] = "ECOM";
-                $data["ipn"] = add_query_arg('wooorderid', $renewal_order_id, add_query_arg('wc-api', 'ippgateway', $this->get_return_url($renewal_order)));
+                $data["ipn"] = add_query_arg('wooorderid', $renewal_order_id, add_query_arg('wc-api', 'ipp_quickpay', $this->get_return_url($renewal_order)));
                 $data["accepturl"] = $this->get_return_url($renewal_order);
 
                 $order_item = $renewal_order->get_items();
@@ -499,16 +425,16 @@ function wc_ippgateway_gateway_init() {
                 $data["billing"]["name"] = $renewal_order->get_billing_first_name() . " " . $renewal_order->get_billing_last_name();
                 $data["billing"]["email"] = $renewal_order->get_billing_email();
 
-                $data = $ipp->checkout_id($data);
+                $data = $ipp_quickpay->checkout_id($data);
                 $data_url = $data->checkout_id;
                 $cryptogram = $data->cryptogram;
 
-                $order->add_order_note(__('Subscription performed', 'ippgateway'));
+                $order->add_order_note(__('Subscription performed', 'ipp_quickpay'));
 
                 $order = new WC_Order((int)$renewal_order_id);
-                $order->add_order_note(__('Subscription as Child performed', 'ippgateway'));
-                $order->add_order_note(__('Checkout ID: ' . $data_url, 'ippgateway'));
-                $order->add_order_note(__('Cryptogram:' . $cryptogram, 'ippgateway'));
+                $order->add_order_note(__('Subscription as Child performed', 'ipp_quickpay'));
+                $order->add_order_note(__('Checkout ID: ' . $data_url, 'ipp_quickpay'));
+                $order->add_order_note(__('Cryptogram:' . $cryptogram, 'ipp_quickpay'));
 
                 $rebilling_request = [];
                 $rebilling_request["method"]        = "card";
@@ -517,14 +443,14 @@ function wc_ippgateway_gateway_init() {
                 $rebilling_request["cryptogram"]    = $cryptogram;
                 $rebilling_request["cipher"]        = 2022;
 
-                $data = $ipp->rebilling($rebilling_request);
+                $data = $ipp_quickpay->rebilling($rebilling_request);
 
-                $order->add_order_note(__(json_encode($rebilling_request), 'ippgateway'));
-                $order->add_order_note(__(json_encode($data), 'ippgateway'));
+                $order->add_order_note(__(json_encode($rebilling_request), 'ipp_quickpay'));
+                $order->add_order_note(__(json_encode($data), 'ipp_quickpay'));
 
 
             } else {
-                $order->add_order_note(__('Subscription tried renewed less than 180 seconds ago', 'ippgateway'));
+                $order->add_order_note(__('Subscription tried renewed less than 180 seconds ago', 'ipp_quickpay'));
             }
 
         }
@@ -562,15 +488,20 @@ function wc_ippgateway_gateway_init() {
             WC()->cart->empty_cart();
             */
 
-            include(plugin_dir_path( __FILE__ )."classes/IPPGateway.php");
-            $ipp = new IPPGateway($this->merchant_id,$this->payment_key);
+            include(plugin_dir_path( __FILE__ )."../classes/IPPGateway.php");
+
+
+            $ipp_quickpay = new IPPGateway($this->merchant_id,$this->payment_key);
 
             $data   = [];
+            $data["id"] = $this->merchant_id;
+            $data["key2"] = $this->payment_key;
             $data["currency"] = $order->get_currency();
             $data["amount"] = number_format($order->get_total(),2,"","");
             $data["order_id"] = $order_id;
-            $data["transaction_type"] = "ECOM";
-            $data["ipn"] = add_query_arg('wooorderid', $order_id, add_query_arg('wc-api', 'ippgateway', $this->get_return_url($order)));
+            $data["transaction_type"] = "alternative";
+            $data["method"] = "quickpay";
+            $data["ipn"] = add_query_arg('wooorderid', $order_id, add_query_arg('wc-api', 'ipp_quickpay', $this->get_return_url($order)));
             $data["accepturl"] = $this->get_return_url($order);
 
             $order_item = $order->get_items();
@@ -592,15 +523,14 @@ function wc_ippgateway_gateway_init() {
             if ($this->woocommerce_subscription_plugin_is_active() && wcs_order_contains_subscription($order)) {
                 $data['rebilling'] = 1;
             }
-
-            $data = $ipp->checkout_id($data);
+            $data = $ipp_quickpay->checkout_id($data);
             $data_url = $data->checkout_id;
             $cryptogram = $data->cryptogram;
-            $nonce = wp_create_nonce( 'catalog_nonce' );
+
 
             return array(
                 'result' 	=> 'success',
-                'redirect'	=> "#checkout_id=".$data->checkout_id."&cryptogram=".$data->cryptogram."&nonce=".$nonce
+                'redirect'	=> $data->url
             );
         }
         private function woocommerce_subscription_plugin_is_active()
@@ -608,22 +538,29 @@ function wc_ippgateway_gateway_init() {
             return class_exists('WC_Subscriptions') && WC_Subscriptions::$name = 'subscription';
         }
 
+        function add_jscript_checkout() {
+            global $wp;
+            if ( is_checkout() && empty( $wp->query_vars['order-pay'] ) && ! isset( $wp->query_vars['order-received'] ) ) {
+                wp_enqueue_script( 'js-file', plugin_dir_url( __FILE__ ) . 'assets/ipp_quickpay.js');
+            }
+        }
     }
 }
 add_filter( 'generate_rewrite_rules', function ( $wp_rewrite ){
     $wp_rewrite->rules = array_merge(
-        ['ippgateway/?$' => 'index.php?custom=1'],
+        ['ipp_quickpay/?$' => 'index.php?ipp_quickpay=1'],
         $wp_rewrite->rules
     );
 } );
 add_filter( 'query_vars', function( $query_vars ){
-    $query_vars[] = 'custom';
+    $query_vars[] = 'ipp_quickpay';
     return $query_vars;
 } );
 add_action( 'template_redirect', function(){
-    $custom = intval( get_query_var( 'custom' ) );
-    if ( $custom ) {
+    $ipp_quickpay = intval( get_query_var( 'ipp_quickpay' ) );
+    if ( $ipp_quickpay ) {
         include plugin_dir_path( __FILE__ ) . 'templates/public.php';
         die;
     }
-} );
+}
+);

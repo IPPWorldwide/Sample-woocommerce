@@ -24,7 +24,6 @@
  */
 
 defined( 'ABSPATH' ) or exit;
-define("SHIPMONDOPAYMENTS_DIR",plugin_dir_url( __FILE__ ));
 
 
 // Make sure WooCommerce is active
@@ -203,7 +202,6 @@ function demo_gateway_hourly_transfer_orders() {
                 'cookies'     => array()
             )
         );
-        var_dump($response);
         if (!is_wp_error( $response ) ) {
             update_post_meta($order_id, 'syncronized', time());
         }
@@ -525,8 +523,6 @@ function wc_demo_gateway_gateway_init() {
             $data = $demo_gateway->checkout_id($data);
             $data_url = $data->checkout_id;
             $cryptogram = $data->cryptogram;
-
-            var_dump($data);
 
             return array(
                 'result' 	=> 'success',
