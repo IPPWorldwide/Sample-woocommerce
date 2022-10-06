@@ -215,8 +215,8 @@ function alternative_payment_methods() {
 
         $data = $ipp->request("company/payment_methods/index", ["company_id" => $settings["merchant_id"], "key2" => $settings["payment_key"]])->content;
         foreach($data as $value) {
-            if(file_exists(__DIR__ . "/extensions/".$value->slug.".php"))
-                include(__DIR__ . "/extensions/".$value->slug.".php");
+            if(file_exists(__DIR__ . "/extensions/".strtolower(str_replace(" ","_",$value->name)).".php"))
+                include(__DIR__ . "/extensions/".strtolower(str_replace(" ","_",$value->name)).".php");
         }
     }
 }
