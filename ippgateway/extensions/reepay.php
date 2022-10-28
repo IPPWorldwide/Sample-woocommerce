@@ -288,7 +288,6 @@ function wc_ipp_reepay_gateway_init() {
                     'default'     => __( 'Reepay Payment Methods', 'wc-gateway-ipp_reepay' ),
                     'desc_tip'    => true,
                 ),
-
                 'merchant_id' => array(
                     'title'       => __( 'IPP Merchant ID', 'wc-gateway-ipp_reepay' ),
                     'type'        => 'text',

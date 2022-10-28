@@ -266,6 +266,7 @@ function wc_ippgateway_gateway_init() {
             $this->merchant_id  = isset($this->settings["merchant_id"]) ? $this->settings["merchant_id"] : "";
             $this->payment_key  = isset($this->settings["payment_key"]) ? $this->settings["payment_key"] : "";
             $this->data_key  = isset($this->settings["data_key"]) ? $this->settings["data_key"] : "";
+            $this->test_mode  = isset($this->settings["test_mode"]) ? $this->settings["test_mode"] : "";
             $this->ipp = new IPPGateway($this->merchant_id,$this->payment_key);
 
             // Actions
@@ -352,6 +353,14 @@ function wc_ippgateway_gateway_init() {
                     'type'        => 'text',
                     'description' => __( 'This controls the title for the payment method the customer sees during checkout.', 'wc-gateway-ippgateway' ),
                     'default'     => __( 'IPPGateway Payment', 'wc-gateway-ippgateway' ),
+                    'desc_tip'    => true,
+                ),
+
+                'test_mode' => array(
+                    'title'       => __( 'Test Mode', 'wc-gateway-ipp_hosted_payment' ),
+                    'type'        => 'checkbox',
+                    'description' => __( 'Sets Webshop for Test Mode', 'wc-gateway-ipp_hosted_payment' ),
+                    'default'     => __( '', 'wc-gateway-ipp_hosted_payment' ),
                     'desc_tip'    => true,
                 ),
 
@@ -568,6 +577,8 @@ function wc_ippgateway_gateway_init() {
             $data   = [];
             $data["currency"] = $order->get_currency();
             $data["amount"] = number_format($order->get_total(),2,"","");
+            if($this->test_mode == "yes")
+                $data["test"] = "true";
             $data["order_id"] = $order_id;
             $data["transaction_type"] = "ECOM";
             $data["ipn"] = add_query_arg('wooorderid', $order_id, add_query_arg('wc-api', 'ippgateway', $this->get_return_url($order)));
