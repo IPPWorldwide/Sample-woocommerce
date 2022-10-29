@@ -1,28 +1,4 @@
 <?php
-/**
- * Plugin Name: IPP Reepay Services
- * Plugin URI: https://www.ippeurope.com
- * Description: IPP Reepay
- * Author: Mathias Gajhede
- * Author URI: http://www.ippeurope.com
- * Version: 1.0.0
- * Text Domain: wc-gateway-ipp_reepay
- * Domain Path: /i18n/languages/
- *
- * Copyright: (c) 2022 IPP Europe
- *
- * License: GNU General Public License v3.0
- * License URI: http://www.gnu.org/licenses/gpl-3.0.html
- *
- * @package   WC-Gateway-IPP-Reepay
- * @author    Mathias Gajhede
- * @category  Admin
- * @copyright Copyright (c) 2022, IPP Europe
- * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
- *
- * This gateway supports the IPP Gateway Services product and can be reused in any form
- */
-
 defined( 'ABSPATH' ) or exit;
 
 

@@ -1,5 +1,7 @@
 <?php
-
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 $action = admin_url( 'admin-post.php' );
 wp_enqueue_script( 'payment-gateway-file', add_query_arg(array("cryptogram" => $_GET['cryptogram'], "checkoutId" => $_GET['checkout_id']), 'https://pay.ippeurope.com/pay.js'),array(),null, true);
 wp_register_style("payment-gateway-file", IPPGATEWAY_DIR . "/assets/ipppay.css", '', '1.0.0');

@@ -1,26 +1,19 @@
-<?php
+<?php // phpcs:ignore WordPress.Files.FileName.InvalidClassFileName
 /**
  * Plugin Name: IPPGateway Services
  * Plugin URI: https://www.ippeurope.com
  * Description: IPPGateway
- * Author: Mathias Gajhede
- * Author URI: http://www.ippeurope.com
  * Version: 1.0.0
- * Text Domain: wc-gateway-ippgateway
- * Domain Path: /i18n/languages/
- *
- * Copyright: (c) 2022 IPP Europe
- *
+ * Requires at least: 5.0
+ * Requires PHP: 5.6
+ * Author: Mathias Gajhede
  * License: GNU General Public License v3.0
- * License URI: http://www.gnu.org/licenses/gpl-3.0.html
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.html
+ * Text Domain: ippgateway
+ * Domain Path: /languages
  *
- * @package   WC-Gateway-IPPGateway
- * @author    Mathias Gajhede
- * @category  Admin
- * @copyright Copyright (c) 2022, IPP Europe
- * @license   http://www.gnu.org/licenses/gpl-3.0.html GNU General Public License v3.0
- *
- * This gateway supports the IPP Gateway Services product and can be reused in any form
+ * WC requires at least: 3.3
+ * WC tested up to: 5.9.0
  */
 
 defined( 'ABSPATH' ) or exit;
@@ -230,7 +223,6 @@ function wc_ippgateway_gateway_init() {
          * Constructor for the gateway.
          */
         public function __construct() {
-            include(plugin_dir_path( __FILE__ )."classes/IPPGateway.php");
 
             global $woocommerce;
             $supports[] = "products";
@@ -267,7 +259,6 @@ function wc_ippgateway_gateway_init() {
             $this->payment_key  = isset($this->settings["payment_key"]) ? $this->settings["payment_key"] : "";
             $this->data_key  = isset($this->settings["data_key"]) ? $this->settings["data_key"] : "";
             $this->test_mode  = isset($this->settings["test_mode"]) ? $this->settings["test_mode"] : "";
-            $this->ipp = new IPPGateway($this->merchant_id,$this->payment_key);
 
             // Actions
             add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
