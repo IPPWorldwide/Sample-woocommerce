@@ -214,6 +214,31 @@ function alternative_payment_methods() {
     }
 }
 alternative_payment_methods();
+add_action('woocommerce_order_status_completed', 'ippgateway_order_status_change');
+
+function ippgateway_order_status_change($order_id) {
+    $order = new WC_Order((int)$order_id);
+    $transaction_id = get_post_meta($order->get_id(), 'Transaction ID', true);
+    $transaction_key = get_post_meta($order->get_id(), 'Transaction Key', true);
+
+    $order->add_order_note(__("Process Capture", 'ippgateway'));
+
+    if(strtolower($order->status) === "completed") {
+        $settings = get_option( 'woocommerce_ippgateway_gateway_settings' );
+
+        $ipp    = new IPPGateway($settings["merchant_id"],$settings["data_key"]);
+        $status = $ipp->request("company/payments/capture/index",[
+            "company_id"    => $settings["merchant_id"],
+            "key1"          => $settings["payment_key"],
+            "transaction_id"=> $transaction_id,
+            "transaction_key"=>$transaction_key,
+            "amount"         => number_format($order->get_total(),2,"","")
+
+        ]);
+        $order->add_order_note(__("Capture performed", 'ippgateway'));
+    }
+
+}
 
 function wc_ippgateway_gateway_init() {
 
@@ -274,6 +299,25 @@ function wc_ippgateway_gateway_init() {
 
             add_action('add_meta_boxes', array(&$this, 'meta_boxes'), 10, 0);
 
+        }
+        public function process_refund($order_id, $amount = null, $reason = '')
+        {
+            $order = new WC_Order((int)$order_id);
+            $transaction_id = get_post_meta($order_id, 'Transaction ID', true);
+            $transaction_key = get_post_meta($order_id, 'Transaction Key', true);
+
+            $order->add_order_note(__("Refund performed", 'ippgateway'));
+
+            $ipp    = new IPPGateway($this->merchant_id,$this->payment_key);
+            $status = $ipp->request("company/payments/refund/index",[
+                "company_id"    => $this->merchant_id,
+                "key2"          => $this->data_key,
+                "transaction_id"=> $transaction_id,
+                "transaction_key"=>$transaction_key,
+                "amount"        => $amount,
+                "comment"       => $reason
+            ]);
+            return $status->success;
         }
         public function meta_boxes()
         {
