@@ -200,7 +200,7 @@ function ipp_hourly_transfer_orders() {
         }
     }
 }
-function alternative_payment_methods() {
+function ippgateway_alternative_payment_methods() {
     $settings = get_option( 'woocommerce_ippgateway_gateway_settings' );
     if(isset($settings["merchant_id"]) && $settings["merchant_id"] !== "" && isset($settings["payment_key"]) && $settings["payment_key"] !== "") {
         include(plugin_dir_path( __FILE__ )."classes/IPPGateway.php");
@@ -213,7 +213,7 @@ function alternative_payment_methods() {
         }
     }
 }
-alternative_payment_methods();
+ippgateway_alternative_payment_methods();
 add_action('woocommerce_order_status_completed', 'ippgateway_order_status_change');
 
 function ippgateway_order_status_change($order_id) {
