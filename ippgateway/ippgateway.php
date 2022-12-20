@@ -203,6 +203,7 @@ function ipp_hourly_transfer_orders() {
 function ippgateway_alternative_payment_methods() {
     $settings = get_option( 'woocommerce_ippgateway_gateway_settings' );
     if(isset($settings["merchant_id"]) && $settings["merchant_id"] !== "" && isset($settings["payment_key"]) && $settings["payment_key"] !== "") {
+/*
         include(plugin_dir_path( __FILE__ )."classes/IPPGateway.php");
         $ipp = new IPPGateway($settings["merchant_id"],$settings["payment_key"]);
 
@@ -211,6 +212,7 @@ function ippgateway_alternative_payment_methods() {
             if(file_exists(__DIR__ . "/extensions/".strtolower(str_replace(" ","_",$value->name)).".php"))
                 include(__DIR__ . "/extensions/".strtolower(str_replace(" ","_",$value->name)).".php");
         }
+*/
     }
 }
 ippgateway_alternative_payment_methods();
