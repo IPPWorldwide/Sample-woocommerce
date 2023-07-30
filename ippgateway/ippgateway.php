@@ -1,6 +1,6 @@
 <?php // phpcs:ignore WordPress.Files.FileName.InvalidClassFileName
 /**
- * Plugin Name: IPPGateway Services
+ * Plugin Name: IPPGateway
  * Plugin URI: https://www.ippeurope.com
  * Description: IPPGateway
  * Version: 1.0.0
